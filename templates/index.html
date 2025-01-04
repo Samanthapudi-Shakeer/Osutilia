@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced System Resource Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f5; /* Light grey - 60% */
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #ffffff; /* Neutral white */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #00509e;
+    text-align: center;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    background-color: #00509e;
+    color: white;
+    border: 6px ridge #f0f0f0;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.tabs button:hover {
+    background-color: #0066cc;
+    transform: translateY(-2px);
+}
+
+.tabs button.active {
+    background-color: #ff6600; /* Orange - 10% */
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tab-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+#resourceChart {
+    margin: auto;
+    max-width: 120%;
+    height: 600px;
+    transition: all 0.3s ease;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    transition: transform 0.2s ease;
+}
+
+table:hover {
+    transform: scale(1.02);
+}
+
+table th, table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    transition: background-color 0.3s ease;
+}
+
+table th {
+    background-color: #00509e; /* Blue - 30% */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+table th:hover {
+    background-color: #0066cc;
+}
+
+table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+table tbody tr:hover {
+    background-color: #f7faff; /* Light blue hover */
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    align-items: center;
+}
+
+.pagination button {
+    background-color: #00509e; /* Blue - 30% */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.pagination button:hover {
+    background-color: #0066cc;
+    transform: translateY(-2px);
+}
+
+.pagination span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 10px;
+    color: #ff6600; /* Orange - 10% */
+    transition: transform 0.3s ease, color 0.3s ease;
+    animation: scaleUpDown 0.6s infinite alternate;
+}
+
+@keyframes scaleUpDown {
+    from {
+        transform: scale(1);
+        color: #ff4500;
+    }
+    to {
+        transform: scale(1.2);
+        color: #ff6600;
+    }
+}
+
+#connectionList, #userList {
+    padding: 0;
+    list-style: none;
+}
+
+#connectionList li, #userList li {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+#connectionList li:hover, #userList li:hover {
+    transform: scale(1.02);
+    background-color: #f2f2f2;
+}
+#resourceTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.95rem;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #resourceTable th, #resourceTable td {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    #resourceTable th {
+        background-color: #00509e;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #resourceTable tbody tr:hover {
+        background-color: #f7faff;
+    }
+
+    #resourceTable tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    <style>
+    #memoryTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.95rem;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #memoryTable th, #memoryTable td {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    #memoryTable th {
+        background-color: #00509e;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #memoryTable tbody tr:hover {
+        background-color: #f7faff;
+    }
+
+    #memoryTable tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    <style>
+    #diskTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.95rem;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #diskTable th, #diskTable td {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    #diskTable th {
+        background-color: #00509e;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #diskTable tbody tr:hover {
+        background-color: #f7faff;
+    }
+
+    #diskTable tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+</style>
+
+</style>
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span style="color:lightgreen;">os</span><span style="color:black;font-size:24px;">.</span>utilia</h1>
+        <div class="tabs">
+            <button onclick="showTab('resources')">Resources</button>
+            <button onclick="showTab('processes')">Processes</button>
+            <button onclick="showTab('connections')">Network Connections</button>
+            <button onclick="showTab('users')">Users</button>
+        </div>
+
+        <!-- Content Tabs -->
+        <div id="resources" class="tab-content active">
+            <h2 style="text-align:center; margin-top:4%;margin-bottom:2%;">System Resources</h2>
+            <canvas id="resourceChart"></canvas>
+            <h3 style="text-align:center; margin-top:4%;margin-bottom:2%;">CPU Data</h3>
+    <table id="resourceTable">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>CPU Usage (%)</th>
+                <th>Memory Usage (%)</th>
+                <th>CPU Frequency</th>
+            </tr>
+        </thead>
+        <tbody id="resourceTableBody"></tbody>
+    </table>
+    <h3 style="text-align:center; margin-top:4%;margin-bottom:2%;">Memory Details</h3>
+    <table id="memoryTable">
+        <thead>
+            <tr>
+                <th>Total Memory (GB)</th>
+                <th>Used Memory (GB)</th>
+                <th>Available Memory (GB)</th>
+                <th>Memory Usage (%)</th>
+            </tr>
+        </thead>
+        <tbody id="memoryTableBody"></tbody>
+    </table>
+    <h3 style="text-align:center; margin-top:4%;margin-bottom:2%;">Disk Details</h3>
+    <table id="diskTable">
+        <thead>
+            <tr>
+                <th>Total Disk (GB)</th>
+                <th>Used Disk (GB)</th>
+                <th>Free Disk (GB)</th>
+                <th>Disk Usage (%)</th>
+            </tr>
+        </thead>
+        <tbody id="diskTableBody"></tbody>
+    </table>
+        </div>
+        <div id="processes" class="tab-content">
+            <h2>Running Processes</h2>
+            <table border="1" id="processTable">
+                <thead><tr><th>PID</th><th>Name</th><th>Status</th><th>CPU (%)</th><th>Memory (%)</th><th>I Usage (Bytes)</th><th>O Usage(Bytes)</th></tr></thead>
+                <tbody id="processBody"></tbody>
+            </table>
+            <div class="pagination">
+                <button onclick="loadProcesses(currentPage - 1)">Previous</button>
+                <span id="pageNumber">1</span>
+                <button onclick="loadProcesses(currentPage + 1)">Next</button>
+            </div>
+        </div>
+        <div id="connections" class="tab-content">
+            <h2>Network Connections</h2>
+            <ul id="connectionList"></ul>
+        </div>
+        <div id="users" class="tab-content">
+            <h2>Active Users</h2>
+            <ul id="userList"></ul>
+        </div>
+    </div>
+    <script>
+        let currentPage = 0;
+        const limit = 10;
+        let chart;
+        const resourceChartData = { labels: [], datasets: [{ label: 'CPU Usage (%)', data: [], borderColor: 'blue' }, { label: 'Memory Usage (%)', data: [], borderColor: 'purple' }] };
+
+        async function fetchSystemResources() {
+            const response = await fetch('/api/system_resources');
+            const data = await response.json();
+            if (resourceChartData.labels.length >= 20) {
+                resourceChartData.labels.shift();
+                resourceChartData.datasets[0].data.shift();
+                resourceChartData.datasets[1].data.shift();
+            }
+            const timeLabel = new Date().toLocaleTimeString();
+            resourceChartData.labels.push(timeLabel);
+            resourceChartData.datasets[0].data.push(data.cpu_usage);
+            resourceChartData.datasets[1].data.push(data.memory_usage);
+            chart.update();
+            const tableBody = document.getElementById('resourceTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `<td>${timeLabel}</td><td>${data.cpu_usage.toFixed(2)}</td><td>${data.memory_usage.toFixed(2)}</td><td>${data.cpu_freq}</td>`;
+    tableBody.appendChild(newRow);
+
+  
+    if (tableBody.rows.length > 1) {
+        tableBody.deleteRow(0);
+    }
+      const memoryTableBody = document.getElementById('memoryTableBody');
+    memoryTableBody.innerHTML = ''; 
+    
+    // Convert memory values from MB to GB
+    const totalMemoryGB = (data.total_memory/1e9).toFixed(2); // Convert to GB
+    const usedMemoryGB = ((data.total_memory - data.available_memory) / 1e9).toFixed(2);   // Convert to GB
+    const availableMemoryGB = (data.available_memory / 1e9).toFixed(2); // Convert to GB
+    const totalDiskGB = (data.total_disk / (1e9)).toFixed(2); // Convert to GB
+    const usedDiskGB = (data.used_disk / (1e9)).toFixed(2);   // Convert to GB
+    const freeDiskGB = (data.free_disk / (1e9)).toFixed(2);   // Convert to GB
+
+    const memoryRow = document.createElement('tr');
+    memoryRow.innerHTML = `
+        <td>${totalMemoryGB}</td>
+        <td>${usedMemoryGB}</td>
+        <td>${availableMemoryGB}</td>
+        <td>${data.memory_usage.toFixed(2)}</td>
+    `;
+    memoryTableBody.appendChild(memoryRow);
+    const diskTableBody = document.getElementById('diskTableBody');
+    diskTableBody.innerHTML = ''; // Clear previous data
+    const diskRow = document.createElement('tr');
+    diskRow.innerHTML = `
+        <td>${totalDiskGB}</td>
+        <td>${usedDiskGB}</td>
+        <td>${freeDiskGB}</td>
+        <td>${data.disk_usage.toFixed(2)}</td>
+    `;
+    diskTableBody.appendChild(diskRow);
+        }
+        async function loadConnections() {
+        try {
+            const response = await fetch('/api/connections');
+            const connections = await response.json();
+
+            const connectionList = document.getElementById('connectionList');
+            connectionList.innerHTML = '';  // Clear any existing data
+
+          
+            connections.forEach(conn => {
+                const li = document.createElement('li');
+                
+                // Construct the content for each list item
+                li.innerHTML = `
+                    <strong>Local Address:</strong> ${conn.local_address}<br>
+                    <strong>Remote Address:</strong> ${conn.remote_address}<br>
+                    <strong>Status:</strong> ${conn.status}
+                `;
+                
+                // Append the list item to the list
+                connectionList.appendChild(li);
+            });
+        } catch (error) {
+            console.error('Error fetching network connections:', error);
+        }
+    }
+        async function loadProcesses(page) {
+            currentPage = page;
+            const response = await fetch(`/api/processes?offset=${currentPage * limit}&limit=${limit}`);
+            const data = await response.json();
+            const processBody = document.getElementById('processBody');
+            processBody.innerHTML = '';
+            data.forEach(proc => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${proc.pid}</td><td>${proc.name}</td><td>${proc.status}</td><td>${proc.cpu_usage.toFixed(2)}</td><td>${proc.memory_usage.toFixed(2)}</td><td>${proc.i_usage}</td><td>${proc.o_usage}</td>`;
+                processBody.appendChild(row);
+            });
+            document.getElementById('pageNumber').innerText = currentPage + 1;
+        }
+
+        
+        async function loadUsers() {
+            const response = await fetch('/api/users');
+            const data = await response.json();
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            data.users.forEach(user => {
+                const li = document.createElement('li');
+                li.innerText = user;
+                userList.appendChild(li);
+            });
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'processes') loadProcesses(currentPage);
+            if (tabId === 'connections') loadConnections();
+            if (tabId === 'users') loadUsers();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('resourceChart').getContext('2d');
+            chart = new Chart(ctx, { type: 'line', data: resourceChartData, options: { scales: { y: { beginAtZero: true } } } });
+        }
+
+        function init() {
+            initChart();
+            setInterval(fetchSystemResources, 2000);
+        }
+        init();
+    </script>
+</body>
+</html>
+
